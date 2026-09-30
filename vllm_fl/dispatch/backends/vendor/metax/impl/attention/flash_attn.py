@@ -247,6 +247,7 @@ class FlashAttentionMetadata:
     max_num_splits: int = 0
 
     causal: bool = True
+    prefill_cu_seq_lens: torch.Tensor | None = None
 
 
 def _get_sliding_window_configs(
@@ -554,6 +555,13 @@ class FlashAttentionMetadataBuilder(AttentionMetadataBuilder[FlashAttentionMetad
                 max_seq_len=max_seq_len,
                 causal=causal,
             )
+
+        prefill_cu_seq_lens = None
+        if num_prefills > 0 and not use_cascade and self.dcp_world_size == 1:
+            prefill_cu_seq_lens = torch.cat(
+                (prefill_seq_lens.new_zeros(1), prefill_seq_lens)
+            ).cumsum(dim=0, dtype=torch.int32)
+
         # For FA3 + full cudagraph
         if self.use_full_cuda_graph and scheduler_metadata is not None:
             n = scheduler_metadata.shape[0]
@@ -599,6 +607,7 @@ class FlashAttentionMetadataBuilder(AttentionMetadataBuilder[FlashAttentionMetad
             prefix_scheduler_metadata=prefix_scheduler_metadata,
             max_num_splits=max_num_splits,
             causal=causal,
+            prefill_cu_seq_lens=prefill_cu_seq_lens,
         )
         return attn_metadata
 
@@ -798,11 +807,13 @@ class FlashAttentionImpl(AttentionImpl):
                 # For handling prefill decode split
                 num_decode_tokens = attn_metadata.num_decode_tokens
                 if attn_metadata.num_prefills > 0:
-                    cu_prefix_kv_lens = torch.tensor(
-                        [0] + attn_metadata.prefill_seq_lens.tolist(),
-                        device=attn_metadata.prefill_seq_lens.device,
-                        dtype=torch.int32,
-                    ).cumsum(dim=0, dtype=torch.int32)
+                    cu_prefix_kv_lens = attn_metadata.prefill_cu_seq_lens
+                    if cu_prefix_kv_lens is None:
+                        cu_prefix_kv_lens = torch.tensor(
+                            [0] + attn_metadata.prefill_seq_lens.tolist(),
+                            device=attn_metadata.prefill_seq_lens.device,
+                            dtype=torch.int32,
+                        ).cumsum(dim=0, dtype=torch.int32)
                     output[num_decode_tokens:num_actual_tokens] = (
                         flash_attn_varlen_func(
                             q=query[num_decode_tokens:num_actual_tokens],
