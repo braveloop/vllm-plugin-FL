@@ -32,9 +32,11 @@ def register_builtins(registry) -> None:
         registry: Registry to register into
     """
     from .iluvatar import IluvatarBackend
+    from .paged_gqa_prefill import register_paged_gqa_prefill_backend
 
     backend = IluvatarBackend()
     is_avail = backend.is_available
+    register_paged_gqa_prefill_backend()
 
     impls = [
         # Activation
