@@ -9,12 +9,20 @@
 import torch
 import vllm.v1.sample.ops.topk_topp_sampler as topk_topp_sampler
 
+from . import topp_prefix_filter
+
+_USE_TOPP_PREFIX = True
+
 
 def _apply_top_k_top_p_no_triton(
     logits: torch.Tensor, k: torch.Tensor | None, p: torch.Tensor | None
 ) -> torch.Tensor:
     if p is None and k is None:
         return logits
+    if _USE_TOPP_PREFIX and topp_prefix_filter.eligible(logits, k, p):
+        result = topp_prefix_filter.apply(logits, p)
+        if result is not None:
+            return result
     return topk_topp_sampler.apply_top_k_top_p_pytorch(logits, k, p)
 
 
