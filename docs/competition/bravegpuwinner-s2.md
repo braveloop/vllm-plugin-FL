@@ -6,7 +6,7 @@
 
 队名为 **bravegpuwinner**。plugin 固定官方比赛分支起点 `13eb9be69ecc5b5ca4f79c44e9ee40081eaa1bf0`，FlagGems 固定官方 v5.3.5 起点 `a7620cc191a0b42e040194622c5758b22a7a25dc`。上游 vLLM 只读参考为 v0.24.0 / `ee0da84ab9e04ac7610e28580af62c365e898389`；镜像中的 vendor vLLM 二进制版本与实际 import 路径须在目标机重新记录，不能用只读 checkout 证明安装包身份。
 
-候选分支均为 `bravegpuwinner/s2-community-candidate`，本 plugin 必须配套 **FlagGems `83da207c5be70e8f041dc5ec2f735cacd886d33e`**。不允许只安装公开发行版 FlagGems。保留的 BF16 参考分支均为 `bravegpuwinner/s2-bf16-reference`：FlagGems `5276bb367`，plugin `283a593`。两对分支独立保留，切换对照时必须成对切换、重启服务并核实实际导入路径。本候选自身提交由所在 checkout 的 `git rev-parse HEAD` 和提交外的 release index 标识，避免把自己的 SHA 写回提交而产生循环。
+候选分支均为 `bravegpuwinner/s2-community-candidate`，本 plugin 必须配套 **FlagGems `f8d285bdfde506c977dc282c4ea771f760a3a4e6`**。不允许只安装公开发行版 FlagGems。保留的 BF16 参考分支均为 `bravegpuwinner/s2-bf16-reference`：FlagGems `5276bb367`，plugin `283a593`。两对分支独立保留，切换对照时必须成对切换、重启服务并核实实际导入路径。本候选自身提交由所在 checkout 的 `git rev-parse HEAD` 和提交外的 release index 标识，避免把自己的 SHA 写回提交而产生循环。
 
 | 平台 | 适用边界与已知环境 |
 | --- | --- |
@@ -47,7 +47,7 @@ recipe 是随源码附带的缩放及校准元数据，大小 1,435,459 字节�
 
 ```bash
 cd /workspace/FlagGems
-git checkout 83da207c5be70e8f041dc5ec2f735cacd886d33e
+git checkout f8d285bdfde506c977dc282c4ea771f760a3a4e6
 pip install --no-build-isolation -e .
 cd /workspace/vllm-plugin-FL
 git checkout bravegpuwinner/s2-community-candidate
@@ -72,6 +72,7 @@ python tests/unit_tests/dispatch/test_iluvatar_paged_gqa_prefill.py
 
 ```bash
 cd /workspace/vllm-plugin-FL
+export VLLM_PLUGINS=fl
 vllm serve /workspace/MiniCPM5-2B --port 9031 \
   --compilation-config '{"cudagraph_mode":"FULL_DECODE_ONLY"}' \
   --served-model-name minicpm --gpu-memory-utilization 0.85 \

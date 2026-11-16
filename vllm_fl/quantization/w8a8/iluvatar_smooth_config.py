@@ -210,5 +210,3 @@ def maybe_enable(vllm_config, vendor_name):
     vllm_config.quant_config = quant
     logger.info("Experimental BI native W8A8 enabled: %s", quant.description())
     return True
-
-

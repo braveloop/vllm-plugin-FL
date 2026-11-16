@@ -71,7 +71,8 @@
     "Do not import current working-tree W8 prototypes, packed kernels, geometry or top-p experiments.",
     "Add recipe package-data declaration; no wheel build or installation performed.",
     "Add submission manifests and reproduction notes; raw evidence, caches, credentials and private application documents are excluded.",
-    "Cleaned combined submission source has not been run; frozen experiment measurements do not validate this tree."
+    "Cleaned combined submission source has not been run; frozen experiment measurements do not validate this tree.",
+    "Format-only cleanup: iluvatar_smooth_config.py has one final newline instead of frozen trailing blank lines; original declared archive hash remains recorded, submitted hash records these distinct bytes. No executable statement changed."
   ],
   "repositories": {
     "FlagGems": {
@@ -113,7 +114,7 @@
         "vllm_fl/kv_cache/extent_first_full_attention.py": "08dfdf2f5ba97852c073cf3ceff7f372cbfd6aa41bcf100fc20a1b6a37062db1",
         "vllm_fl/platform.py": "70dbb6cf6b1e426482d05f1e11ad3a9f664ec7c9e0a21ce60515d3d57800be8a",
         "vllm_fl/quantization/w8a8/iluvatar_smooth.py": "1de6592476a4a421e2f93c34088106e54e9bae66de1cbafbe9def11a439bdce3",
-        "vllm_fl/quantization/w8a8/iluvatar_smooth_config.py": "62d3349ab109a34f6bd2d08cee4b6590e9d168bd9a5a1364353ea277c7f4ee10",
+        "vllm_fl/quantization/w8a8/iluvatar_smooth_config.py": "612573eac26fe561bf643b1d16469f170ba154564859b75b3943e38780092aa2",
         "vllm_fl/quantization/w8a8/smooth_recipe.pt": "6e735d05bbbe2e0686fef111c1aead8a60afc304e06cbb5aa2ee91258b4ade54",
         "vllm_fl/worker/model_runner.py": "0e6b3f140d264d9a6207733d88416ab2df611fac94e0da9dc167121db0743e99"
       }
@@ -152,7 +153,7 @@
   "hash_scope": "Source/distribution payload hashes exclude documentation and submission/manifest.json. Final release index records commits, document and manifest hashes without self-reference.",
   "repository": "vllm-plugin-FL",
   "dependencies": {
-    "FlagGems_commit": "83da207c5be70e8f041dc5ec2f735cacd886d33e",
+    "FlagGems_commit": "f8d285bdfde506c977dc282c4ea771f760a3a4e6",
     "vllm_read_only_reference": "ee0da84ab9e04ac7610e28580af62c365e898389"
   }
 }
