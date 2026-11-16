@@ -3,7 +3,7 @@
   "release_id": "S2-20261116-COMMUNITY-DRAFT-LATEST",
   "team": "bravegpuwinner",
   "prepared_date": "2026-11-16",
-  "publication_status": "blocked_pending_target_runtime",
+  "publication_status": "team_fork_report_review",
   "official_event_zip_submitted": false,
   "validation": {
     "submitted_tree_runtime_verified": false,
@@ -153,7 +153,17 @@
   "hash_scope": "Source/distribution payload hashes exclude documentation and submission/manifest.json. Final release index records commits, document and manifest hashes without self-reference.",
   "repository": "vllm-plugin-FL",
   "dependencies": {
-    "FlagGems_commit": "f8d285bdfde506c977dc282c4ea771f760a3a4e6",
+    "FlagGems_commit": "10d19b55c55cac76ce6573078c4efd0efd39ef3a",
     "vllm_read_only_reference": "ee0da84ab9e04ac7610e28580af62c365e898389"
+  },
+  "official_submission_status": "blocked_pending_target_runtime",
+  "sharing": {
+    "plan_id": "S2-20261116-TEAM-REPORT-SHARE",
+    "destination": "own GitHub fork only",
+    "purpose": "team report preparation and source review",
+    "runtime_source_ancestor_commit": "68dc756ed312240424ca7906f0b33210977186ea",
+    "official_community_pr_created": false,
+    "official_event_submission_complete": false,
+    "documentation_only_since_runtime_source_ancestor": true
   }
 }

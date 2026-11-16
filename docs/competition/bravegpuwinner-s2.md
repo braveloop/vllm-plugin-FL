@@ -1,12 +1,12 @@
 # bravegpuwinner：FlagOS S2 赛道2候选复现说明
 
-本候选把 MiniCPM5-2B 的分页注意力、缓存放置和部分线性层量化接在现有 FlagOS 分派路径中。分页注意力重用同组查询与历史数据；缓存放置争取让连续逻辑页落在连续物理页；量化路径把部分权重与激活转成 INT8，再恢复 BF16 输出。本文说明实现归属、固定版本、安装及复用现有测试和官方吞吐命令的方法。2026-11-16 仅完成提交整理和本机静态检查：整理后的组合源码尚未真机测试，尚未推送或创建社区 PR；发布状态为 `blocked_pending_target_runtime`。
+本候选把 MiniCPM5-2B 的分页注意力、缓存放置和部分线性层量化接在现有 FlagOS 分派路径中。分页注意力重用同组查询与历史数据；缓存放置争取让连续逻辑页落在连续物理页；量化路径把部分权重与激活转成 INT8，再恢复 BF16 输出。本文说明实现归属、固定版本、安装及复用现有测试和官方吞吐命令的方法。2026-11-16 首次仅完成本机静态整理、未推送；随后用户授权将本分支共享到自有 fork，供组员完成报告与源码审阅。整理树尚未真机测试，官方社区 PR 和赛事正式提交仍为 `blocked_pending_target_runtime`。
 
 ## 1. 固定源码与平台条件
 
 队名为 **bravegpuwinner**。plugin 固定官方比赛分支起点 `13eb9be69ecc5b5ca4f79c44e9ee40081eaa1bf0`，FlagGems 固定官方 v5.3.5 起点 `a7620cc191a0b42e040194622c5758b22a7a25dc`。上游 vLLM 只读参考为 v0.24.0 / `ee0da84ab9e04ac7610e28580af62c365e898389`；镜像中的 vendor vLLM 二进制版本与实际 import 路径须在目标机重新记录，不能用只读 checkout 证明安装包身份。
 
-候选分支均为 `bravegpuwinner/s2-community-candidate`，本 plugin 必须配套 **FlagGems `f8d285bdfde506c977dc282c4ea771f760a3a4e6`**。不允许只安装公开发行版 FlagGems。保留的 BF16 参考分支均为 `bravegpuwinner/s2-bf16-reference`：FlagGems `5276bb367`，plugin `283a593`。两对分支独立保留，切换对照时必须成对切换、重启服务并核实实际导入路径。本候选自身提交由所在 checkout 的 `git rev-parse HEAD` 和提交外的 release index 标识，避免把自己的 SHA 写回提交而产生循环。
+候选分支均为 `bravegpuwinner/s2-community-candidate`，本 plugin 必须配套 **FlagGems `10d19b55c55cac76ce6573078c4efd0efd39ef3a`**。不允许只安装公开发行版 FlagGems。保留的 BF16 参考分支均为 `bravegpuwinner/s2-bf16-reference`：FlagGems `5276bb367`，plugin `283a593`。两对分支独立保留，切换对照时必须成对切换、重启服务并核实实际导入路径。本候选自身提交由所在 checkout 的 `git rev-parse HEAD` 和提交外的 release index 标识，避免把自己的 SHA 写回提交而产生循环。
 
 | 平台 | 适用边界与已知环境 |
 | --- | --- |
@@ -47,7 +47,7 @@ recipe 是随源码附带的缩放及校准元数据，大小 1,435,459 字节�
 
 ```bash
 cd /workspace/FlagGems
-git checkout f8d285bdfde506c977dc282c4ea771f760a3a4e6
+git checkout 10d19b55c55cac76ce6573078c4efd0efd39ef3a
 pip install --no-build-isolation -e .
 cd /workspace/vllm-plugin-FL
 git checkout bravegpuwinner/s2-community-candidate
@@ -101,6 +101,6 @@ BI 应在同环境按成对 BF16/候选各完整执行两景四轮，保留全�
 
 相对组委会公布基线的 2.48/4.69 倍仅为吞吐比值，不是官方综合分。此前 BF16 的 3864.10/3164.70 tok/s 与 102/105 是另一源码身份；此前 MetaX 的 7795.68/8551.02 tok/s 与 102/105 属历史租赁预验证。上述精度都不能继承给量化候选，两个平台的新整理树也尚未运行。
 
-用户最新要求先证明正确性与稳定复现后提交，目前没有目标服务器，并明确暂不运行 105 题。因此 `submitted_tree_runtime_verified=false`、`submitted_tree_stable_throughput_verified=false`、`model_accuracy_verified=false`、`full105_run=false`。当前没有 push、社区 PR 或正式赛事 ZIP 提交。后续先完成本文正确性和双平台吞吐复现；完整 MATH-500 Level 3 仍须单独获得用户授权并通过，方能满足最终竞赛质量交付门。
+用户最新要求先证明正确性与稳定复现后提交，目前没有目标服务器，并明确暂不运行 105 题。因此 `submitted_tree_runtime_verified=false`、`submitted_tree_stable_throughput_verified=false`、`model_accuracy_verified=false`、`full105_run=false`。首次整理时没有 push；当前分支按用户授权共享到自有 fork 供团队报告审阅，没有创建官方社区 PR，也未提交正式赛事 ZIP。后续先完成本文正确性和双平台吞吐复现；完整 MATH-500 Level 3 仍须单独获得用户授权并通过，方能满足最终竞赛质量交付门。
 
 官方依据：[当前赛题](https://flagos.io/race-detail-season2?id=539vlt2p&lang=cn)、[plugin 比赛分支](https://github.com/flagos-ai/vllm-plugin-FL/tree/flagos-2026-s2)、[FlagGems v5.3.5](https://github.com/flagos-ai/FlagGems/tree/v5.3.5)。本候选保留原主体选择逻辑、benchmark 和服务 workload；量化资格、组委会认可的平台与最终提交文件仍以当前官方要求为准。
