@@ -3290,6 +3290,12 @@ class ModelRunnerFL(
     def apply_sparse_weight_patches(self, patches: Iterable[SparseWeightPatch]) -> None:
         """Apply sparse flat-index patches directly to existing model params."""
         model = self.get_model()
+        packed_reload = current_platform.vendor_name == "metax"
+        if packed_reload:
+            import importlib, flag_gems
+            packed_down = importlib.import_module('.mm_tile_packed', flag_gems.mm_out.__module__.rpartition('.')[0])
+            begin_reload, finish_reload = packed_down.begin_reload, packed_down.finish_reload
+            begin_reload(model)
         for patch in patches:
             param = model.get_parameter(patch.name)
             if not param.data.is_contiguous():
@@ -3324,6 +3330,8 @@ class ModelRunnerFL(
                 patch.indices.to(device=flat_param.device, dtype=torch.long),
                 patch.values.to(device=flat_param.device),
             )
+        if packed_reload:
+            finish_reload(model)
 
     def get_supported_generation_tasks(self) -> list[GenerationTask]:
         model = self.get_model()
@@ -5250,6 +5258,14 @@ class ModelRunnerFL(
                 self.model = model_loader.load_model(
                     vllm_config=self.vllm_config, model_config=self.model_config
                 )
+                if (current_platform.vendor_name == "metax"
+                        and self.model_config.quantization is None
+                        and self.lora_config is None
+                        and not self.model_config.enable_sleep_mode):
+                    import importlib, flag_gems
+                    packed_down = importlib.import_module('.mm_tile_packed', flag_gems.mm_out.__module__.rpartition('.')[0])
+                    count, size = packed_down.register_model(self.model)
+                    logger.info("METAX_DOWN_PACK_LOAD weights=%d packed_bytes=%d", count, size)
                 if self.lora_config:
                     self.model = self.load_lora_model(
                         self.model, self.vllm_config, self.device
@@ -5493,6 +5509,12 @@ class ModelRunnerFL(
             )
 
         model = self.get_model()
+        packed_reload = current_platform.vendor_name == "metax"
+        if packed_reload:
+            import importlib, flag_gems
+            packed_down = importlib.import_module('.mm_tile_packed', flag_gems.mm_out.__module__.rpartition('.')[0])
+            begin_reload, finish_reload = packed_down.begin_reload, packed_down.finish_reload
+            begin_reload(model)
         weights_to_load = {name for name, _ in model.named_parameters()}
         counter_before_reloading = time.perf_counter()
 
@@ -5531,6 +5553,9 @@ class ModelRunnerFL(
                 param = model.get_parameter(name)  # TODO: buffers?
                 param.copy_(loaded_weight)
                 loaded_weights.add(name)
+
+        if packed_reload:
+            finish_reload(model)
 
         # logging and validation
         counter_after_reloading = time.perf_counter()
@@ -7223,7 +7248,18 @@ class ModelRunnerFL(
                         cache_dtype_str=self.cache_config.cache_dtype,
                     )
                     try:
-                        kv_cache_stride_order = attn_backend.get_kv_cache_stride_order()
+                        resolve_order = getattr(
+                            attn_backend, "get_kv_cache_stride_order_for_spec", None
+                        )
+                        if resolve_order is None:
+                            kv_cache_stride_order = attn_backend.get_kv_cache_stride_order()
+                        else:
+                            kv_cache_stride_order = resolve_order(
+                                kv_cache_spec, packing=packing,
+                                kernel_block_size=kernel_block_size,
+                                kv_cache_config=self.kv_cache_config,
+                                vllm_config=self.vllm_config,
+                            )
                         assert len(kv_cache_stride_order) == len(kv_cache_shape)
                     except (AttributeError, NotImplementedError):
                         kv_cache_stride_order = tuple(range(len(kv_cache_shape)))
