@@ -185,6 +185,26 @@ def test_decode_guards(monkeypatch):
         assert not guard()
 
 
+def test_q32_density_and_mixed_workspace(monkeypatch):
+    for maximum, tokens, sequences, expected in (
+        (2, 4096, 1, 2), (31, 2048, 1, 16), (32, 31, 1, 16),
+        (32, 32, 1, 32), (33, 64, 2, 32), (33, 63, 2, 16),
+        (4096, 2030, 64, 16), (32, 32, 0, 8),
+    ):
+        assert bridge.select_query_tile(maximum, tokens, sequences) == expected
+    _, query, _, _, metadata = decode_objects()
+    metadata.iluvatar_mixed_has_q1 = True
+    monkeypatch.setattr(bridge, "is_batch_invariant", False)
+    for tile in (16, 32):
+        assert bridge._can_split_mixed_q1(query, metadata, tile, CUDAGraphMode.NONE)
+        assert not bridge._can_split_mixed_q1(query, metadata, tile, CUDAGraphMode.FULL)
+    assert not bridge._can_split_mixed_q1(query, metadata, 8, CUDAGraphMode.NONE)
+    metadata.softmax_segm_output = None
+    assert not bridge._can_split_mixed_q1(query, metadata, 32, CUDAGraphMode.NONE)
+
+
+
+
 def test_decode_full_forward_contract(monkeypatch):
     from flag_gems.runtime.backend._iluvatar.fused import paged_gqa_decode as kernel
 

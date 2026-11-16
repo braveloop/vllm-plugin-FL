@@ -26,6 +26,8 @@ _reported_external_override = False
 def select_query_tile(max_query_len, tokens, sequences):
     if max_query_len == 2:
         return 2
+    if max_query_len >= 32 and sequences > 0 and tokens >= 32 * sequences:
+        return 32
     if max_query_len >= 16 and sequences > 0 and tokens >= 16 * sequences:
         return 16
     return 8
@@ -117,7 +119,7 @@ def can_use_paged_gqa_decode(impl, query, kv_cache, output, metadata,
 
 def _can_split_mixed_q1(query, metadata, query_tile, cudagraph_mode):
     """Called only after the unchanged Prefill feature/layout compatibility gate."""
-    return (query_tile == 16 and cudagraph_mode == CUDAGraphMode.NONE
+    return (query_tile in (16, 32) and cudagraph_mode == CUDAGraphMode.NONE
             and not is_batch_invariant
             and getattr(metadata, "iluvatar_mixed_has_q1", False) is True
             and _has_decode_workspace(query, metadata))
@@ -130,7 +132,7 @@ class IluvatarPagedGQAMetadataBuilder(TritonAttentionMetadataBuilder):
         sequences = metadata.seq_lens.numel()
         if (self.vllm_config.speculative_config is None
                 and select_query_tile(metadata.max_query_len,
-                                      metadata.num_actual_tokens, sequences) == 16):
+                                      metadata.num_actual_tokens, sequences) in (16, 32)):
             starts_cpu = getattr(common_attn_metadata, "query_start_loc_cpu", None)
             if (isinstance(starts_cpu, torch.Tensor) and starts_cpu.device.type == "cpu"
                     and starts_cpu.ndim == 1 and starts_cpu.numel() >= sequences + 1
