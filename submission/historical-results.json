@@ -1,0 +1,168 @@
+{
+  "experiment_id": "bi150-20261029-051419Z-bounded-extent-first",
+  "historical_only": true,
+  "submitted_tree_runtime_verified": false,
+  "model_accuracy_verified": false,
+  "full105_run": false,
+  "statistical_method": "original RUNS4 SKIP_FIRST1 separately in each scenario/arm; retain all raw slow rounds",
+  "comparison": "retained BF16 originalmanager versus frozenv2+bounded extent-first combination",
+  "scenarios": {
+    "4k": {
+      "control": {
+        "all_four": [
+          4065.33,
+          3987.94,
+          3927.7,
+          3876.18
+        ],
+        "all_ttft_ms": [
+          5606.64,
+          4144.25,
+          4182.8,
+          4168.9
+        ],
+        "excluded_indices": [
+          1
+        ],
+        "effective_indices": [
+          2,
+          3,
+          4
+        ],
+        "mean": 3930.6066666666666,
+        "sample_sd": 55.93666895099623,
+        "cv_percent": 1.4231052276322798,
+        "minimum": 3876.18,
+        "maximum": 3987.94,
+        "mean_ttft_ms": 4165.316666666667,
+        "ttft_limit_ms": 11689.27,
+        "every_round_ttft_pass": true,
+        "effective_ttft_pass": true
+      },
+      "candidate": {
+        "all_four": [
+          4925.72,
+          5045.63,
+          4999.42,
+          5059.44
+        ],
+        "all_ttft_ms": [
+          4710.29,
+          3199.45,
+          3206.35,
+          3205.6
+        ],
+        "excluded_indices": [
+          1
+        ],
+        "effective_indices": [
+          2,
+          3,
+          4
+        ],
+        "mean": 5034.83,
+        "sample_sd": 31.43374142541719,
+        "cv_percent": 0.624325775158589,
+        "minimum": 4999.42,
+        "maximum": 5059.44,
+        "mean_ttft_ms": 3203.7999999999997,
+        "ttft_limit_ms": 11689.27,
+        "every_round_ttft_pass": true,
+        "effective_ttft_pass": true
+      },
+      "mean_gain_percent": 28.092949180024807,
+      "range_gap_tok_s": 1011.48,
+      "slowest_over_fastest_percent": 25.363470864656932,
+      "stable_separation": true,
+      "ttft_change_percent": -23.083879176853305,
+      "official_baseline_multiple": 2.482645549085064
+    },
+    "16k": {
+      "control": {
+        "all_four": [
+          3176.43,
+          3164.49,
+          3162.38,
+          3161.49
+        ],
+        "all_ttft_ms": [
+          156614.65,
+          157075.55,
+          157188.28,
+          157225.11
+        ],
+        "excluded_indices": [
+          1
+        ],
+        "effective_indices": [
+          2,
+          3,
+          4
+        ],
+        "mean": 3162.7866666666664,
+        "sample_sd": 1.540789840741819,
+        "cv_percent": 0.048716211465684875,
+        "minimum": 3161.49,
+        "maximum": 3164.49,
+        "mean_ttft_ms": 157162.97999999998,
+        "ttft_limit_ms": 605254.65,
+        "every_round_ttft_pass": true,
+        "effective_ttft_pass": true
+      },
+      "candidate": {
+        "all_four": [
+          4103.02,
+          4295.47,
+          4296.64,
+          4286.97
+        ],
+        "all_ttft_ms": [
+          121223.14,
+          115211.06,
+          115123.53,
+          115436.5
+        ],
+        "excluded_indices": [
+          1
+        ],
+        "effective_indices": [
+          2,
+          3,
+          4
+        ],
+        "mean": 4293.026666666667,
+        "sample_sd": 5.277748888809849,
+        "cv_percent": 0.12293771501092894,
+        "minimum": 4286.97,
+        "maximum": 4296.64,
+        "mean_ttft_ms": 115257.03,
+        "ttft_limit_ms": 605254.65,
+        "every_round_ttft_pass": true,
+        "effective_ttft_pass": true
+      },
+      "mean_gain_percent": 35.73557495710536,
+      "range_gap_tok_s": 1122.4800000000005,
+      "slowest_over_fastest_percent": 35.47111856886893,
+      "stable_separation": true,
+      "ttft_change_percent": -26.664008279812457,
+      "official_baseline_multiple": 4.691063395800324
+    }
+  },
+  "arms": {
+    "control": {
+      "wrapper_exit_status": 0,
+      "successful_requests": 1536,
+      "input_tokens": 12582912,
+      "output_tokens": 1572864,
+      "all_rows_success": true
+    },
+    "candidate": {
+      "wrapper_exit_status": 0,
+      "successful_requests": 1536,
+      "input_tokens": 12582912,
+      "output_tokens": 1572864,
+      "all_rows_success": true
+    }
+  },
+  "note": "Official-baseline multiples are ratios only, not an official score. Accuracy and combined-tree verification remain pending."
+}

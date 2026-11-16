@@ -7223,7 +7223,18 @@ class ModelRunnerFL(
                         cache_dtype_str=self.cache_config.cache_dtype,
                     )
                     try:
-                        kv_cache_stride_order = attn_backend.get_kv_cache_stride_order()
+                        resolve_order = getattr(
+                            attn_backend, "get_kv_cache_stride_order_for_spec", None
+                        )
+                        if resolve_order is None:
+                            kv_cache_stride_order = attn_backend.get_kv_cache_stride_order()
+                        else:
+                            kv_cache_stride_order = resolve_order(
+                                kv_cache_spec, packing=packing,
+                                kernel_block_size=kernel_block_size,
+                                kv_cache_config=self.kv_cache_config,
+                                vllm_config=self.vllm_config,
+                            )
                         assert len(kv_cache_stride_order) == len(kv_cache_shape)
                     except (AttributeError, NotImplementedError):
                         kv_cache_stride_order = tuple(range(len(kv_cache_shape)))
@@ -7579,6 +7590,9 @@ class ModelRunnerFL(
                     spec = replace(spec, indexes_kv_by_block_stride=indexes)
                 kv_cache_spec[layer_name] = spec
 
+        if getattr(current_platform, "vendor_name", None) == "iluvatar":
+            from vllm_fl.kv_cache.extent_first_full_attention import maybe_use_extent_first_specs
+            return maybe_use_extent_first_specs(kv_cache_spec, self.vllm_config, "iluvatar")
         return kv_cache_spec
 
     def _to_list(self, sampled_token_ids: torch.Tensor) -> list[list[int]]:

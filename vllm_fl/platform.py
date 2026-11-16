@@ -173,9 +173,20 @@ class PlatformFL(Platform):
         import vllm.kernels  # noqa: F401
 
     @classmethod
+    def register_custom_kv_cache_specs(cls, vllm_config: "VllmConfig") -> None:
+        if cls.vendor_name == "iluvatar":
+            from vllm_fl.kv_cache.extent_first_full_attention import register_extent_first_full_attention
+            register_extent_first_full_attention()
+
+    @classmethod
     def check_and_update_config(cls, vllm_config: "VllmConfig") -> None:
         parallel_config = vllm_config.parallel_config
         model_config = vllm_config.model_config
+
+        if cls.vendor_name == "iluvatar":
+            from vllm_fl.quantization.w8a8.iluvatar_smooth_config import maybe_enable
+
+            maybe_enable(vllm_config, cls.vendor_name)
 
         parallel_config.worker_cls = "vllm_fl.worker.worker.WorkerFL"
 

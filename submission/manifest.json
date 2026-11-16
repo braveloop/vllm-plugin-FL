@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "release_id": "S2-20261116-COMMUNITY-DRAFT-LATEST",
+  "team": "bravegpuwinner",
+  "prepared_date": "2026-11-16",
+  "publication_status": "blocked_pending_target_runtime",
+  "official_event_zip_submitted": false,
+  "validation": {
+    "submitted_tree_runtime_verified": false,
+    "model_accuracy_verified": false,
+    "full105_run": false,
+    "submitted_tree_stable_throughput_verified": false,
+    "cross_platform_regression_verified": false,
+    "wheel_built": false,
+    "wheel_install_verified": false,
+    "full105_authorized": false,
+    "local_checks": "stdlib hashes, AST/TOML/ZIP/pickle opcode inspection and git diff --check only; no project imports/tests"
+  },
+  "original_experiment": {
+    "experiment_id": "bi150-20261029-051419Z-bounded-extent-first",
+    "archive_name": "candidate-source-frozen.tar.gz",
+    "archive_sha256": "92579d259797686cba06d29bc886fb4c164d8ca935b271817fb7eb908b754f1d",
+    "archive_bytes": 5768898,
+    "declared_source_sha256": {
+      "FlagGems/src/flag_gems/runtime/backend/_iluvatar/fused/paged_gqa_prefill.py": "14de9cb7ad44b632959081e6a194c837b0b70a3de13c61acdbbdc80ac4a402a0",
+      "vllm-plugin-FL/vllm_fl/dispatch/backends/vendor/iluvatar/paged_gqa_prefill.py": "fca11d94879dac498182c80690b7b08daa427db0a4acca26ea4961d35d980201",
+      "FlagGems/src/flag_gems/runtime/backend/_iluvatar/ops/mm.py": "8401b9c4211cd1446d0350997cfd1064c11ab2b4710783e9e45ba0a9ed773147",
+      "FlagGems/src/flag_gems/runtime/backend/_iluvatar/fused/paged_gqa_decode.py": "07561a170f3bc3c062c76d38e4078a0ce4fd09ec1debbd2baaa291f58642231d",
+      "vllm-plugin-FL/vllm_fl/worker/model_runner.py": "9bbc0de4a361dd8517e29268f9d93ae56731ac1a0bde4ce0575bfb3212c7ee27",
+      "FlagGems/src/flag_gems/runtime/backend/_iluvatar/ops/smooth_w8a8.py": "5b75991cef485562ddaaa6603f138abd9996f08ee6b83dba347b2af8590543d5",
+      "vllm-plugin-FL/vllm_fl/quantization/w8a8/iluvatar_smooth.py": "1de6592476a4a421e2f93c34088106e54e9bae66de1cbafbe9def11a439bdce3",
+      "vllm-plugin-FL/vllm_fl/quantization/w8a8/iluvatar_smooth_config.py": "62d3349ab109a34f6bd2d08cee4b6590e9d168bd9a5a1364353ea277c7f4ee10",
+      "vllm-plugin-FL/vllm_fl/platform.py": "70dbb6cf6b1e426482d05f1e11ad3a9f664ec7c9e0a21ce60515d3d57800be8a",
+      "vllm-plugin-FL/vllm_fl/quantization/w8a8/smooth_recipe.pt": "6e735d05bbbe2e0686fef111c1aead8a60afc304e06cbb5aa2ee91258b4ade54",
+      "vllm-plugin-FL/vllm_fl/kv_cache/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "vllm-plugin-FL/vllm_fl/kv_cache/extent_first_full_attention.py": "08dfdf2f5ba97852c073cf3ceff7f372cbfd6aa41bcf100fc20a1b6a37062db1"
+    },
+    "all_12_declared_hashes_match": true,
+    "final_summary_name": "final-summary.json",
+    "final_summary_sha256": "91876d67e87a7707de7c6f4ffbaeb376818d6b58c2759ef0eb489d76d51a3a84",
+    "historical_results_only": true,
+    "source_archive_incomplete": true,
+    "archive_policy": "Only explicitly listed regular files copied; cache and unrelated archive contents excluded; no delete synchronization"
+  },
+  "history": {
+    "bf16_experiment_id": "bi150-20261019-074350Z-q32-final",
+    "bf16_q32_manifest_sha256": "958dcea655a058f249897baf31dc9450a0225494fc7302ca04c5627b3764524e",
+    "bf16_historical_bi150": {
+      "total_throughput_tok_s": [
+        3864.1,
+        3164.7
+      ],
+      "math_level3_correct": 102,
+      "total_questions": 105
+    },
+    "bf16_historical_c500": {
+      "total_throughput_tok_s": [
+        7795.68,
+        8551.02
+      ],
+      "math_level3_correct": 102,
+      "total_questions": 105,
+      "environment": "rented prevalidation; organizer acceptance and current combined-tree regression pending"
+    },
+    "inherited_accuracy": false
+  },
+  "cleaned_vs_experiment": [
+    "Use BF16 bases before unverified MetaX geometry/top-p commits; retain tested MetaX 1bbd3c585 and 47882ba ancestry.",
+    "Import only five FlagGems files and eight plugin files from frozen archive; unchanged whitelist files may have no Git diff.",
+    "model_runner.py retains only the two frozen Iluvatar KV changes. Omit MetaX apply_sparse_weight_patches/load_model/reload_weights downpack hooks because frozen FlagGems lacks mm_tile_packed.",
+    "Do not import current working-tree W8 prototypes, packed kernels, geometry or top-p experiments.",
+    "Add recipe package-data declaration; no wheel build or installation performed.",
+    "Add submission manifests and reproduction notes; raw evidence, caches, credentials and private application documents are excluded.",
+    "Cleaned combined submission source has not been run; frozen experiment measurements do not validate this tree."
+  ],
+  "repositories": {
+    "FlagGems": {
+      "official_pin": "a7620cc191a0b42e040194622c5758b22a7a25dc",
+      "retained_base": "e9cb4bbdcf48279325d7cf5c87f5655607395687",
+      "bf16_branch": "bravegpuwinner/s2-bf16-reference",
+      "bf16_commit": "5276bb367c7de2b102cd8338cfd95f23f096c8eb",
+      "candidate_branch": "bravegpuwinner/s2-community-candidate",
+      "candidate_parent": "5276bb367c7de2b102cd8338cfd95f23f096c8eb",
+      "candidate_commit_resolution": "Resolve branch HEAD and consult external release-index.json; candidate commit is intentionally not embedded in its own manifest.",
+      "submitted_payload_sha256": {
+        "src/flag_gems/ops/sort.py": "892f7fea86b5136ec936a6eb56939df07c4788ced3699968e6b222c57b2ed96a",
+        "src/flag_gems/runtime/backend/_iluvatar/fused/paged_gqa_decode.py": "07561a170f3bc3c062c76d38e4078a0ce4fd09ec1debbd2baaa291f58642231d",
+        "src/flag_gems/runtime/backend/_iluvatar/fused/paged_gqa_prefill.py": "14de9cb7ad44b632959081e6a194c837b0b70a3de13c61acdbbdc80ac4a402a0",
+        "src/flag_gems/runtime/backend/_iluvatar/ops/mm.py": "8401b9c4211cd1446d0350997cfd1064c11ab2b4710783e9e45ba0a9ed773147",
+        "src/flag_gems/runtime/backend/_iluvatar/ops/smooth_w8a8.py": "5b75991cef485562ddaaa6603f138abd9996f08ee6b83dba347b2af8590543d5",
+        "src/flag_gems/utils/models/sql.py": "bb1ee22a27b1523ec83c0c8bbf478f057ca5411ea9c7165ecef5944de4ccf45a",
+        "submission/historical-results.json": "b49fdd477800813499d7c8b13532ba89d9b3a4a07515a23d3d14541799679282",
+        "tests/test_iluvatar_paged_gqa_prefill.py": "55771b308f377e8670de5be030a0e19d60b9ce9b725ab87a64bbae1ad0d3c374",
+        "tests/test_sort.py": "536847ab0910f73bb7f5d663a0a14a1e4e154ab65ba2c08832c31a50dc1b74d1"
+      }
+    },
+    "vllm-plugin-FL": {
+      "official_pin": "13eb9be69ecc5b5ca4f79c44e9ee40081eaa1bf0",
+      "retained_base": "c75ae7e02507a2e4cee3b3369ff142318dca2bd0",
+      "bf16_branch": "bravegpuwinner/s2-bf16-reference",
+      "bf16_commit": "283a5938255d29c8ceb4e5cb02e58391921e5791",
+      "candidate_branch": "bravegpuwinner/s2-community-candidate",
+      "candidate_parent": "283a5938255d29c8ceb4e5cb02e58391921e5791",
+      "candidate_commit_resolution": "Resolve branch HEAD and consult external release-index.json; candidate commit is intentionally not embedded in its own manifest.",
+      "submitted_payload_sha256": {
+        "pyproject.toml": "df202527e496e1e1b426604ba430fa76b0d33e7ed7640e6f2763bb4d0a5be02e",
+        "submission/historical-results.json": "b49fdd477800813499d7c8b13532ba89d9b3a4a07515a23d3d14541799679282",
+        "tests/unit_tests/dispatch/test_iluvatar_paged_gqa_prefill.py": "3a796740dd9dd81054195bafea7ba158d98f51af3d641f2b1bf9bbe63ed65e17",
+        "vllm_fl/dispatch/backends/vendor/iluvatar/paged_gqa_prefill.py": "fca11d94879dac498182c80690b7b08daa427db0a4acca26ea4961d35d980201",
+        "vllm_fl/dispatch/backends/vendor/iluvatar/register_ops.py": "913226ebea69ecdc6f538d4fd327a6bc70ebc26a0814a4e3aa813b752fd04a53",
+        "vllm_fl/dispatch/backends/vendor/metax/impl/attention/flash_attn.py": "a9105899fc5b0f27d327f86df33a8a38b18e27243e1e55b3f65a6eb4a1e8459e",
+        "vllm_fl/kv_cache/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "vllm_fl/kv_cache/extent_first_full_attention.py": "08dfdf2f5ba97852c073cf3ceff7f372cbfd6aa41bcf100fc20a1b6a37062db1",
+        "vllm_fl/platform.py": "70dbb6cf6b1e426482d05f1e11ad3a9f664ec7c9e0a21ce60515d3d57800be8a",
+        "vllm_fl/quantization/w8a8/iluvatar_smooth.py": "1de6592476a4a421e2f93c34088106e54e9bae66de1cbafbe9def11a439bdce3",
+        "vllm_fl/quantization/w8a8/iluvatar_smooth_config.py": "62d3349ab109a34f6bd2d08cee4b6590e9d168bd9a5a1364353ea277c7f4ee10",
+        "vllm_fl/quantization/w8a8/smooth_recipe.pt": "6e735d05bbbe2e0686fef111c1aead8a60afc304e06cbb5aa2ee91258b4ade54",
+        "vllm_fl/worker/model_runner.py": "0e6b3f140d264d9a6207733d88416ab2df611fac94e0da9dc167121db0743e99"
+      }
+    }
+  },
+  "recipe": {
+    "path": "vllm_fl/quantization/w8a8/smooth_recipe.pt",
+    "sha256": "6e735d05bbbe2e0686fef111c1aead8a60afc304e06cbb5aa2ee91258b4ade54",
+    "bytes": 1435459,
+    "metadata_only": true,
+    "local_scan": "ZIP directory and pickletools opcode inspection only; no torch.load, imports, pickle.load or unpickling",
+    "pickle_globals": [
+      "collections.OrderedDict",
+      "torch.FloatStorage",
+      "torch._utils._rebuild_tensor_v2"
+    ],
+    "calibration_dataset": "Salesforce/wikitext/wikitext-2-raw-v1",
+    "calibration_revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+    "train_segments": 32,
+    "validation_segments": 8,
+    "segment_tokens": 768,
+    "math_and_benchmark_used_for_calibration": false,
+    "enabled_modules_historical": 83,
+    "abi": "raw_i8_NK_f32_N1_inverse_s_f32_K_dynamic_a8_bf16_v1",
+    "registration_name": "bi_smooth_native_w8a8_v2",
+    "registration_version": 2
+  },
+  "vendor_gemm": {
+    "provider": "ixformer.inference.functions.w8a8.w8a8",
+    "format": "TN",
+    "historical_version": "0.7.0+corex.4.5.0",
+    "wrapper_sha256": "3758806ffdd81da8b9a3fa021d6db292698af02a78059fbcf484625c0683271d",
+    "binary_sha256": "878d895e337590b63d5b7936b1f4fc01bd4ceb30a64fa6b74161858362ef5daf",
+    "attribution": "Existing vendor INT8 GEMM, not claimed as self-developed. Custom work is fused inverse-s A8/RNE preparation, load-time W8/scales, calibration ABI and scoped integration."
+  },
+  "hash_scope": "Source/distribution payload hashes exclude documentation and submission/manifest.json. Final release index records commits, document and manifest hashes without self-reference.",
+  "repository": "vllm-plugin-FL",
+  "dependencies": {
+    "FlagGems_commit": "83da207c5be70e8f041dc5ec2f735cacd886d33e",
+    "vllm_read_only_reference": "ee0da84ab9e04ac7610e28580af62c365e898389"
+  }
+}

@@ -5,7 +5,7 @@
 import logging
 
 import torch
-from vllm.config import CUDAGraphMode
+from vllm.config import CUDAGraphMode, get_current_vllm_config_or_none
 from vllm.forward_context import get_forward_context, is_forward_context_available
 from vllm.platforms import current_platform
 from vllm.v1.attention.backend import AttentionType
@@ -16,11 +16,42 @@ from vllm.v1.attention.backends.triton_attn import (
     TritonAttentionBackend, TritonAttentionImpl, TritonAttentionMetadataBuilder,
 )
 from vllm.v1.attention.ops.triton_unified_attention import is_batch_invariant
-from vllm.v1.kv_cache_interface import KVQuantMode
+from vllm.v1.attention.backends.utils import get_kv_cache_layout
+from vllm.v1.kv_cache_interface import FullAttentionSpec, KVQuantMode
+from vllm_fl.kv_cache.extent_first_full_attention import ExtentFirstFullAttentionSpec
 
 logger = logging.getLogger(__name__)
 BACKEND_PATH = __name__ + ".IluvatarPagedGQAPrefillBackend"
 _reported_external_override = False
+_reported_kv_slabs_layout = False
+
+
+def _can_use_kv_slabs(config):
+    """Keep block-major storage for features that copy/pack/zero whole pages."""
+    if config is None or getattr(current_platform, "vendor_name", None) != "iluvatar":
+        return False
+    model, cache, parallel = config.model_config, config.cache_config, config.parallel_config
+    if model is None or get_kv_cache_layout() != "NHD":
+        return False
+    quantization_supported = model.quantization is None
+    if not quantization_supported:
+        from vllm_fl.quantization.w8a8.iluvatar_smooth_config import is_bf16_kv_compatible
+
+        quantization_supported = is_bf16_kv_compatible(config)
+    if (model.dtype != torch.bfloat16 or cache.cache_dtype not in ("auto", "bfloat16")
+            or not quantization_supported or model.is_hybrid or model.use_mla
+            or model.is_encoder_decoder or model.is_mm_prefix_lm
+            or model.get_sliding_window() is not None or model.attention_chunk_size is not None
+            or model.enable_sleep_mode or cache.kv_sharing_fast_prefill
+            or config.kv_transfer_config is not None or cache.kv_offloading_size is not None
+            or config.speculative_config is not None):
+        return False
+    if any(getattr(parallel, name) != 1 for name in (
+            "tensor_parallel_size", "pipeline_parallel_size", "data_parallel_size",
+            "decode_context_parallel_size", "prefill_context_parallel_size")):
+        return False
+    return (model.get_num_attention_heads(parallel), model.get_num_kv_heads(parallel),
+            model.get_head_size()) == (16, 2, 128)
 
 
 def select_query_tile(max_query_len, tokens, sequences):
@@ -198,6 +229,47 @@ class IluvatarPagedGQAPrefillImpl(TritonAttentionImpl):
 
 
 class IluvatarPagedGQAPrefillBackend(TritonAttentionBackend):
+    @staticmethod
+    def get_kv_cache_stride_order(include_num_layers_dimension=False):
+        if _can_use_kv_slabs(get_current_vllm_config_or_none()):
+            # Logical [block, K/V, token, head, dim] remains unchanged.
+            return ((0, 2, 1, 3, 4, 5) if include_num_layers_dimension
+                    else (1, 0, 2, 3, 4))
+        return TritonAttentionBackend.get_kv_cache_stride_order(include_num_layers_dimension)
+
+    @classmethod
+    def indexes_kv_by_block_stride(cls):
+        if _can_use_kv_slabs(get_current_vllm_config_or_none()):
+            return False
+        return TritonAttentionBackend.indexes_kv_by_block_stride()
+
+    @classmethod
+    def get_kv_cache_stride_order_for_spec(
+        cls, spec, *, packing, kernel_block_size, kv_cache_config, vllm_config,
+    ):
+        global _reported_kv_slabs_layout
+        # The actual spec can still require padding/packing after backend selection.
+        eligible = (
+            _can_use_kv_slabs(vllm_config)
+            and type(spec) in (FullAttentionSpec, ExtentFirstFullAttentionSpec)
+            and spec.dtype == torch.bfloat16 and spec.kv_quant_mode == KVQuantMode.NONE
+            and spec.num_kv_heads == 2 and spec.head_size == 128
+            and spec.head_size_v in (None, 128)
+            and spec.sliding_window is None and spec.attention_chunk_size is None
+            and not spec.non_causal and not spec.indexes_kv_by_block_stride
+            and packing is None and spec.page_size_padded is None
+            and spec.storage_block_size == spec.block_size == kernel_block_size
+            and kernel_block_size in (16, 32, 64)
+            and len(kv_cache_config.kv_cache_groups) == 1
+            and not kv_cache_config.needs_kv_cache_zeroing
+        )
+        if eligible:
+            if not _reported_kv_slabs_layout:
+                logger.info("Using separate BF16 K/V slabs for iluvatar Decode; page=%d, Prefill/native fallbacks retained", kernel_block_size)
+                _reported_kv_slabs_layout = True
+            return (1, 0, 2, 3, 4)
+        return TritonAttentionBackend.get_kv_cache_stride_order()
+
     @staticmethod
     def get_builder_cls():
         return IluvatarPagedGQAMetadataBuilder
